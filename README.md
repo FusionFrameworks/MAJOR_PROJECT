@@ -1,9 +1,13 @@
 # MAJOR_PROJECT
 
-1. Clone the repo.
-1. Install the dependencies:
-   - `pip install flask`
-   - `pip install scikit-learn`
-   - `pip install flask scikit-learn`
-2. Move inside the `major_Codes` folder.
-3. Run the code by typing `python chatbot.py` in the terminal.
+#REQUIREMENTS
+
+Flask==2.2.3
+scikit-learn==1.2.2
+googletrans==4.0.0-rc1
+twilio==7.16.1
+gunicorn==20.1.0
+pickle-mixin==1.0.2
+
+pip install -r requirements.txt
+python chatbot.py => to run

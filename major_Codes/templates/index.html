@@ -2032,7 +2032,7 @@
         .send-button:hover {
             background-color: #0056b3; /* Darker blue on hover */
         }
-        /* Removed styles related to call-button and call-container */
+       
     </style>
 </head>
 <body>
@@ -2048,7 +2048,7 @@
             <button class="send-button" onclick="sendMessage()">Send</button>
             <button class="microphone-button" onclick="startSpeechRecognition()">🎙️</button>
         </div>
-        <!-- Removed call-container div -->
+    
     </div>
     <script>
         // Initialize Speech Recognition and Synthesis
@@ -2140,63 +2140,13 @@
                 };
                 synth.speak(utterance);
 
-                /*
-                // Removed call feature logic
-                // Show call button if response indicates
-                if (data.response.toLowerCase().includes("please provide the phone number")) {
-                    document.getElementById('call-container').style.display = 'flex';
-                }
-                */
+               
             })
             .catch(error => {
                 console.error('Error:', error);
             });
         }
 
-        /*
-        // Removed makeCall function
-        function makeCall() {
-            const phoneNumber = document.getElementById('phone-number').value;
-            if (!phoneNumber) return;
-
-            // Send phone number to the backend to initiate the call
-            fetch('/call', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ phone_number: phoneNumber }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Add bot response to chat box
-                const chatBox = document.getElementById('chat-box');
-                const botMessage = document.createElement('div');
-                botMessage.classList.add('bot');
-                botMessage.textContent = data.response;
-                chatBox.appendChild(botMessage);
-
-                // Scroll to the bottom of the chat box
-                chatBox.scrollTop = chatBox.scrollHeight;
-
-                // Speak the bot's response
-                const language = document.getElementById('language-select').value;
-                const utterance = new SpeechSynthesisUtterance(data.response);
-                utterance.lang = language === 'kn' ? 'kn-IN' : (language === 'hi' ? 'hi-IN' : 'en-US');
-                utterance.onend = function() {
-                    // Restart speech recognition after speaking
-                    startSpeechRecognition();
-                };
-                synth.speak(utterance);
-
-                // Hide call button after initiating call
-                document.getElementById('call-container').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-        */
 
         // Allow pressing Enter to send a message
         document.getElementById('user-input').addEventListener('keypress', function (e) {
@@ -2208,3 +2158,6 @@
     </script>
 </body>
 </html>
+
+
+

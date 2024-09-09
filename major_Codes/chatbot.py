@@ -504,223 +504,223 @@
 
 
 
-# from flask import Flask, request, jsonify, render_template, session
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.svm import LinearSVC
-# import pickle
-# import os
-# from googletrans import Translator
+from flask import Flask, request, jsonify, render_template, session
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import LinearSVC
+import pickle
+import os
+from googletrans import Translator
 
-# app = Flask(__name__)
-# app.secret_key = '7888accc4a8508133c302792b0cd27f471bb262bc5666c'
+app = Flask(__name__)
+app.secret_key = '7888accc4a8508133c302792b0cd27f471bb262bc5666c'
 
-# # Sample training data with diseases and their symptoms in English, Kannada, and Hindi
-# training_data = [
-#     ("Fever", "high temperature, chills, sweating, headache, muscle pain"),
-#     ("Flu", "fever, cough, sore throat, runny or stuffy nose, muscle aches"),
-#     ("Cold", "sore throat, runny nose, coughing, sneezing, mild fever"),
-#     ("Headache", "dull pain, pressure in the head, nausea, sensitivity to light"),
-#     ("Stomachache", "abdominal pain, bloating, nausea, vomiting, diarrhea"),
-#     ("Allergy", "sneezing, itchy eyes, runny nose, rash, swelling"),
+# Sample training data with diseases and their symptoms in English, Kannada, and Hindi
+training_data = [
+    ("Fever", "high temperature, chills, sweating, headache, muscle pain"),
+    ("Flu", "fever, cough, sore throat, runny or stuffy nose, muscle aches"),
+    ("Cold", "sore throat, runny nose, coughing, sneezing, mild fever"),
+    ("Headache", "dull pain, pressure in the head, nausea, sensitivity to light"),
+    ("Stomachache", "abdominal pain, bloating, nausea, vomiting, diarrhea"),
+    ("Allergy", "sneezing, itchy eyes, runny nose, rash, swelling"),
 
-#     ("ಜ್ವರ", "ಹೆಚ್ಚಿನ ತಾಪಮಾನ, ಚಿಲ್ಲುಗಳು, ಸ್ವೇತ, ತಲೆನೋವು, ಸ್ನಾಯು ನೋವು"),
-#     ("ಫ್ಲು", "ಜ್ವರ, ಕಫ, ತುಕ್ಕು, ಓಡೋಣ ಅಥವಾ ನಾಕೆ, ಸ್ನಾಯು ನೋವು"),
-#     ("ಚಳಿ", "ತಲೆನೋವು, ಓಡೋಣ, ಕೆಮ್ಮು, ಚಿರತೆ, ಕಡಿಮೆ ಜ್ವರ"),
-#     ("ತಲೆನೋವು", "ಮಂದ ಪೆಡ, ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ, ವಾಂತಿ, ಬೆಳಕುಗೆ ಅಸಹನಶೀಲತೆ"),
-#     ("ಉಸಿರಾಟದ ನೋವು", "ಪೆಟ್ನ ನೋವು, ಬ್ಲೋಟಿಂಗ್, ವಾಂತಿ, ಉಸಿರಾಟದ ನೋವು, ಜೀರ್ಣಶಕ್ತಿ"),
-#     ("ಆಲರ್ಜೀ", "ಚಿರತೆ, ಕಣ್ಣುಗಳು ಸೀಡು, ಓಡೋಣ, ಉಬ್ಬು, ಪುಟ್ಟ"),
+    ("ಜ್ವರ", "ಹೆಚ್ಚಿನ ತಾಪಮಾನ, ಚಿಲ್ಲುಗಳು, ಸ್ವೇತ, ತಲೆನೋವು, ಸ್ನಾಯು ನೋವು"),
+    ("ಫ್ಲು", "ಜ್ವರ, ಕಫ, ತುಕ್ಕು, ಓಡೋಣ ಅಥವಾ ನಾಕೆ, ಸ್ನಾಯು ನೋವು"),
+    ("ಚಳಿ", "ತಲೆನೋವು, ಓಡೋಣ, ಕೆಮ್ಮು, ಚಿರತೆ, ಕಡಿಮೆ ಜ್ವರ"),
+    ("ತಲೆನೋವು", "ಮಂದ ಪೆಡ, ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ, ವಾಂತಿ, ಬೆಳಕುಗೆ ಅಸಹನಶೀಲತೆ"),
+    ("ಉಸಿರಾಟದ ನೋವು", "ಪೆಟ್ನ ನೋವು, ಬ್ಲೋಟಿಂಗ್, ವಾಂತಿ, ಉಸಿರಾಟದ ನೋವು, ಜೀರ್ಣಶಕ್ತಿ"),
+    ("ಆಲರ್ಜೀ", "ಚಿರತೆ, ಕಣ್ಣುಗಳು ಸೀಡು, ಓಡೋಣ, ಉಬ್ಬು, ಪುಟ್ಟ"),
 
-#     ("बुखार", "उच्च तापमान, ठंड लगना, पसीना, सिरदर्द, मांसपेशियों में दर्द"),
-#     ("फ्लू", "ज्वर, खांसी, गले में खराश, बहती या बंद नाक, मांसपेशियों में दर्द"),
-#     ("सर्दी", "गले में खराश, बहती नाक, खांसी, छींके, हल्का ज्वर"),
-#     ("सिरदर्द", "सुस्त दर्द, सिर में दबाव, मतली, प्रकाश के प्रति संवेदनशीलता"),
-#     ("पेट दर्द", "पेट में दर्द, सूजन, मतली, उल्टी, दस्त"),
-#     ("एलर्जी", "छींके, खुजली वाली आँखें, बहती नाक, चकत्ते, सूजन")
-# ]
+    ("बुखार", "उच्च तापमान, ठंड लगना, पसीना, सिरदर्द, मांसपेशियों में दर्द"),
+    ("फ्लू", "ज्वर, खांसी, गले में खराश, बहती या बंद नाक, मांसपेशियों में दर्द"),
+    ("सर्दी", "गले में खराश, बहती नाक, खांसी, छींके, हल्का ज्वर"),
+    ("सिरदर्द", "सुस्त दर्द, सिर में दबाव, मतली, प्रकाश के प्रति संवेदनशीलता"),
+    ("पेट दर्द", "पेट में दर्द, सूजन, मतली, उल्टी, दस्त"),
+    ("एलर्जी", "छींके, खुजली वाली आँखें, बहती नाक, चकत्ते, सूजन")
+]
 
-# # Create a dictionary for symptoms to diseases mapping in English, Kannada, and Hindi
-# symptoms_to_disease = {
-#     "high temperature": "Fever",
-#     "chills": "Fever",
-#     "sweating": "Fever",
-#     "headache": "Fever",
-#     "muscle pain": "Fever",
-#     "cough": "Flu",
-#     "sore throat": "Flu",
-#     "runny or stuffy nose": "Flu",
-#     "muscle aches": "Flu",
-#     "sore throat": "Cold",
-#     "runny nose": "Cold",
-#     "coughing": "Cold",
-#     "sneezing": "Cold",
-#     "mild fever": "Cold",
-#     "dull pain": "Headache",
-#     "pressure in the head": "Headache",
-#     "nausea": "Headache",
-#     "sensitivity to light": "Headache",
-#     "abdominal pain": "Stomachache",
-#     "bloating": "Stomachache",
-#     "nausea": "Stomachache",
-#     "vomiting": "Stomachache",
-#     "diarrhea": "Stomachache",
-#     "sneezing": "Allergy",
-#     "itchy eyes": "Allergy",
-#     "runny nose": "Allergy",
-#     "rash": "Allergy",
-#     "swelling": "Allergy",
+# Create a dictionary for symptoms to diseases mapping in English, Kannada, and Hindi
+symptoms_to_disease = {
+    "high temperature": "Fever",
+    "chills": "Fever",
+    "sweating": "Fever",
+    "headache": "Fever",
+    "muscle pain": "Fever",
+    "cough": "Flu",
+    "sore throat": "Flu",
+    "runny or stuffy nose": "Flu",
+    "muscle aches": "Flu",
+    "sore throat": "Cold",
+    "runny nose": "Cold",
+    "coughing": "Cold",
+    "sneezing": "Cold",
+    "mild fever": "Cold",
+    "dull pain": "Headache",
+    "pressure in the head": "Headache",
+    "nausea": "Headache",
+    "sensitivity to light": "Headache",
+    "abdominal pain": "Stomachache",
+    "bloating": "Stomachache",
+    "nausea": "Stomachache",
+    "vomiting": "Stomachache",
+    "diarrhea": "Stomachache",
+    "sneezing": "Allergy",
+    "itchy eyes": "Allergy",
+    "runny nose": "Allergy",
+    "rash": "Allergy",
+    "swelling": "Allergy",
 
-#     "ಹೆಚ್ಚಿನ ತಾಪಮಾನ": "ಜ್ವರ",
-#     "ಚಿಲ್ಲುಗಳು": "ಜ್ವರ",
-#     "ಸ್ವೇತ": "ಜ್ವರ",
-#     "ತಲೆನೋವು": "ಜ್ವರ",
-#     "ಸ್ನಾಯು ನೋವು": "ಜ್ವರ",
-#     "ಕೆಮ್ಮು": "ಫ್ಲು",
-#     "ತುಕ್ಕು": "ಫ್ಲು",
-#     "ಓಡೋಣ ಅಥವಾ ನಾಕೆ": "ಫ್ಲು",
-#     "ಸ್ನಾಯು ನೋವು": "ಫ್ಲು",
-#     "ತಲೆನೋವು": "ಚಳಿ",
-#     "ಓಡೋಣ": "ಚಳಿ",
-#     "ಕೆಮ್ಮು": "ಚಳಿ",
-#     "ಚಿರತೆ": "ಚಳಿ",
-#     "ಕಡಿಮೆ ಜ್ವರ": "ಚಳಿ",
-#     "ಮಂದ ಪೆಡ": "ತಲೆನೋವು",
-#     "ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ": "ತಲೆನೋವು",
-#     "ವಾಂತಿ": "ತಲೆನೋವು",
-#     "ಬಳಕುಗಾಗಿ ಅಸಹನಶೀಲತೆ": "ತಲೆನೋವು",
-#     "ಪೆಟ್ನ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
-#     "ಬ್ಲೋಟಿಂಗ್": "ಉಸಿರಾಟದ ನೋವು",
-#     "ವಾಂತಿ": "ಉಸಿರಾಟದ ನೋವು",
-#     "ಉಸಿರಾಟದ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
-#     "ಜೀರ್ಣಶಕ್ತಿ": "ಉಸಿರಾಟದ ನೋವು",
-#     "ಚಿರತೆ": "ಆಲರ್ಜೀ",
-#     "ಕಣ್ಣುಗಳು ಸೀಡು": "ಆಲರ್ಜೀ",
-#     "ಓಡೋಣ": "ಆಲರ್ಜೀ",
-#     "ಉಬ್ಬು": "ಆಲರ್ಜೀ",
-#     "ಪುಟ್ಟ": "ಆಲರ್ಜೀ",
+    "ಹೆಚ್ಚಿನ ತಾಪಮಾನ": "ಜ್ವರ",
+    "ಚಿಲ್ಲುಗಳು": "ಜ್ವರ",
+    "ಸ್ವೇತ": "ಜ್ವರ",
+    "ತಲೆನೋವು": "ಜ್ವರ",
+    "ಸ್ನಾಯು ನೋವು": "ಜ್ವರ",
+    "ಕೆಮ್ಮು": "ಫ್ಲು",
+    "ತುಕ್ಕು": "ಫ್ಲು",
+    "ಓಡೋಣ ಅಥವಾ ನಾಕೆ": "ಫ್ಲು",
+    "ಸ್ನಾಯು ನೋವು": "ಫ್ಲು",
+    "ತಲೆನೋವು": "ಚಳಿ",
+    "ಓಡೋಣ": "ಚಳಿ",
+    "ಕೆಮ್ಮು": "ಚಳಿ",
+    "ಚಿರತೆ": "ಚಳಿ",
+    "ಕಡಿಮೆ ಜ್ವರ": "ಚಳಿ",
+    "ಮಂದ ಪೆಡ": "ತಲೆನೋವು",
+    "ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ": "ತಲೆನೋವು",
+    "ವಾಂತಿ": "ತಲೆನೋವು",
+    "ಬಳಕುಗಾಗಿ ಅಸಹನಶೀಲತೆ": "ತಲೆನೋವು",
+    "ಪೆಟ್ನ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
+    "ಬ್ಲೋಟಿಂಗ್": "ಉಸಿರಾಟದ ನೋವು",
+    "ವಾಂತಿ": "ಉಸಿರಾಟದ ನೋವು",
+    "ಉಸಿರಾಟದ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
+    "ಜೀರ್ಣಶಕ್ತಿ": "ಉಸಿರಾಟದ ನೋವು",
+    "ಚಿರತೆ": "ಆಲರ್ಜೀ",
+    "ಕಣ್ಣುಗಳು ಸೀಡು": "ಆಲರ್ಜೀ",
+    "ಓಡೋಣ": "ಆಲರ್ಜೀ",
+    "ಉಬ್ಬು": "ಆಲರ್ಜೀ",
+    "ಪುಟ್ಟ": "ಆಲರ್ಜೀ",
 
-#     "उच्च तापमान": "बुखार",
-#     "ठंड लगना": "बुखार",
-#     "पसीना": "बुखार",
-#     "सिरदर्द": "बुखार",
-#     "मांसपेशियों में दर्द": "बुखार",
-#     "खांसी": "फ्लू",
-#     "गले में खराश": "फ्लू",
-#     "बहती या बंद नाक": "फ्लू",
-#     "मांसपेशियों में दर्द": "फ्लू",
-#     "गले में खराश": "सर्दी",
-#     "बहती नाक": "सर्दी",
-#     "खांसी": "सर्दी",
-#     "छींके": "सर्दी",
-#     "हल्का ज्वर": "सर्दी",
-#     "सुस्त दर्द": "सिरदर्द",
-#     "सिर में दबाव": "सिरदर्द",
-#     "मतली": "सिरदर्द",
-#     "प्रकाश के प्रति संवेदनशीलता": "सिरदर्द",
-#     "पेट में दर्द": "पेट दर्द",
-#     "सूजन": "पेट दर्द",
-#     "मतली": "पेट दर्द",
-#     "उल्टी": "पेट दर्द",
-#     "दस्त": "पेट दर्द",
-#     "छींके": "एलर्जी",
-#     "खुजली वाली आँखें": "एलर्जी",
-#     "बहती नाक": "एलर्जी",
-#     "चकत्ते": "एलर्जी",
-#     "सूजन": "एलर्जी"
-# }
+    "उच्च तापमान": "बुखार",
+    "ठंड लगना": "बुखार",
+    "पसीना": "बुखार",
+    "सिरदर्द": "बुखार",
+    "मांसपेशियों में दर्द": "बुखार",
+    "खांसी": "फ्लू",
+    "गले में खराश": "फ्लू",
+    "बहती या बंद नाक": "फ्लू",
+    "मांसपेशियों में दर्द": "फ्लू",
+    "गले में खराश": "सर्दी",
+    "बहती नाक": "सर्दी",
+    "खांसी": "सर्दी",
+    "छींके": "सर्दी",
+    "हल्का ज्वर": "सर्दी",
+    "सुस्त दर्द": "सिरदर्द",
+    "सिर में दबाव": "सिरदर्द",
+    "मतली": "सिरदर्द",
+    "प्रकाश के प्रति संवेदनशीलता": "सिरदर्द",
+    "पेट में दर्द": "पेट दर्द",
+    "सूजन": "पेट दर्द",
+    "मतली": "पेट दर्द",
+    "उल्टी": "पेट दर्द",
+    "दस्त": "पेट दर्द",
+    "छींके": "एलर्जी",
+    "खुजली वाली आँखें": "एलर्जी",
+    "बहती नाक": "एलर्जी",
+    "चकत्ते": "एलर्जी",
+    "सूजन": "एलर्जी"
+}
 
-# # Create a dictionary for disease names in Kannada and Hindi
-# disease_names = {
-#     "Fever": {"kn": "ಜ್ವರ", "hi": "बुखार"},
-#     "Flu": {"kn": "ಫ್ಲು", "hi": "फ्लू"},
-#     "Cold": {"kn": "ಚಳಿ", "hi": "सर्दी"},
-#     "Headache": {"kn": "ತಲೆನೋವು", "hi": "सिरदर्द"},
-#     "Stomachache": {"kn": "ಉಸಿರಾಟದ ನೋವು", "hi": "पेट दर्द"},
-#     "Allergy": {"kn": "ಆಲರ್ಜೀ", "hi": "एलर्जी"}
-# }
+# Create a dictionary for disease names in Kannada and Hindi
+disease_names = {
+    "Fever": {"kn": "ಜ್ವರ", "hi": "बुखार"},
+    "Flu": {"kn": "ಫ್ಲು", "hi": "फ्लू"},
+    "Cold": {"kn": "ಚಳಿ", "hi": "सर्दी"},
+    "Headache": {"kn": "ತಲೆನೋವು", "hi": "सिरदर्द"},
+    "Stomachache": {"kn": "ಉಸಿರಾಟದ ನೋವು", "hi": "पेट दर्द"},
+    "Allergy": {"kn": "ಆಲರ್ಜೀ", "hi": "एलर्जी"}
+}
 
-# translator = Translator()
+translator = Translator()
 
-# # Function to train and save the model
-# def train_and_save_model():
-#     # Split the training data into inputs and responses
-#     X_train, y_train = zip(*training_data[:6])  # Use only the English data for training
+# Function to train and save the model
+def train_and_save_model():
+    # Split the training data into inputs and responses
+    X_train, y_train = zip(*training_data[:6])  # Use only the English data for training
 
-#     # Create the TF-IDF vectorizer
-#     vectorizer = TfidfVectorizer()
+    # Create the TF-IDF vectorizer
+    vectorizer = TfidfVectorizer()
 
-#     # Transform the training data into feature vectors
-#     X_train_vectors = vectorizer.fit_transform(X_train)
+    # Transform the training data into feature vectors
+    X_train_vectors = vectorizer.fit_transform(X_train)
 
-#     # Create and train the LinearSVC model
-#     model = LinearSVC()
-#     model.fit(X_train_vectors, y_train)
+    # Create and train the LinearSVC model
+    model = LinearSVC()
+    model.fit(X_train_vectors, y_train)
 
-#     # Save the vectorizer and the model to disk
-#     with open("chatbot_vectorizer.pkl", "wb") as f:
-#         pickle.dump(vectorizer, f)
+    # Save the vectorizer and the model to disk
+    with open("chatbot_vectorizer.pkl", "wb") as f:
+        pickle.dump(vectorizer, f)
 
-#     with open("chatbot_model.pkl", "wb") as f:
-#         pickle.dump(model, f)
+    with open("chatbot_model.pkl", "wb") as f:
+        pickle.dump(model, f)
 
-# # Check if the model files exist, if not, train and save the model
-# if not os.path.exists("chatbot_vectorizer.pkl") or not os.path.exists("chatbot_model.pkl"):
-#     train_and_save_model()
+# Check if the model files exist, if not, train and save the model
+if not os.path.exists("chatbot_vectorizer.pkl") or not os.path.exists("chatbot_model.pkl"):
+    train_and_save_model()
 
-# # Load the vectorizer and the model from disk
-# with open("chatbot_vectorizer.pkl", "rb") as f:
-#     vectorizer = pickle.load(f)
+# Load the vectorizer and the model from disk
+with open("chatbot_vectorizer.pkl", "rb") as f:
+    vectorizer = pickle.load(f)
 
-# with open("chatbot_model.pkl", "rb") as f:
-#     model = pickle.load(f)
+with open("chatbot_model.pkl", "rb") as f:
+    model = pickle.load(f)
 
-# @app.route('/')
-# def index():
-#     return render_template('index.html')
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-# @app.route('/chat', methods=['POST'])
-# def chat():
-#     user_message = request.json['message']
-#     user_language = request.json.get('language', 'en')
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.json['message']
+    user_language = request.json.get('language', 'en')
 
-#     if user_language == 'kn':
-#         user_message = translator.translate(user_message, src='kn', dest='en').text
-#     elif user_language == 'hi':
-#         user_message = translator.translate(user_message, src='hi', dest='en').text
+    if user_language == 'kn':
+        user_message = translator.translate(user_message, src='kn', dest='en').text
+    elif user_language == 'hi':
+        user_message = translator.translate(user_message, src='hi', dest='en').text
 
-#     session.setdefault('conversation', []).append(('user', user_message))
+    session.setdefault('conversation', []).append(('user', user_message))
 
-#     # Transform the user input into a feature vector
-#     user_message_vector = vectorizer.transform([user_message])
+    # Transform the user input into a feature vector
+    user_message_vector = vectorizer.transform([user_message])
 
-#     # Make a prediction using the trained model
-#     response = model.predict(user_message_vector)[0]
+    # Make a prediction using the trained model
+    response = model.predict(user_message_vector)[0]
 
-#     # Predict disease based on symptoms
-#     symptoms = user_message.lower().split(", ")
-#     diseases = set()
-#     for symptom in symptoms:
-#         if symptom in symptoms_to_disease:
-#             diseases.add(symptoms_to_disease[symptom])
-#     if diseases:
-#         response = f"I think you might have: {', '.join(diseases)}. We are connecting you to a suitable doctor please wait."
+    # Predict disease based on symptoms
+    symptoms = user_message.lower().split(", ")
+    diseases = set()
+    for symptom in symptoms:
+        if symptom in symptoms_to_disease:
+            diseases.add(symptoms_to_disease[symptom])
+    if diseases:
+        response = f"I think you might have: {', '.join(diseases)}. We are connecting you to a suitable doctor please wait."
 
-#     if user_language == 'kn':
-#         response = translator.translate(response, src='en', dest='kn').text
-#     elif user_language == 'hi':
-#         response = translator.translate(response, src='en', dest='hi').text
+    if user_language == 'kn':
+        response = translator.translate(response, src='en', dest='kn').text
+    elif user_language == 'hi':
+        response = translator.translate(response, src='en', dest='hi').text
 
-#     session['conversation'].append(('bot', response))
-#     return jsonify({'response': response})
+    session['conversation'].append(('bot', response))
+    return jsonify({'response': response})
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
-
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
 
 
 
+
+0
 # from flask import Flask, request, jsonify, render_template, session
 # from sklearn.feature_extraction.text import TfidfVectorizer
 # from sklearn.svm import LinearSVC
@@ -1194,221 +1194,221 @@
 
 
 
-from flask import Flask, request, jsonify, render_template, session
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.svm import LinearSVC
-import pickle
-import os
-from googletrans import Translator
-from twilio.rest import Client
+# from flask import Flask, request, jsonify, render_template, session
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.svm import LinearSVC
+# import pickle
+# import os
+# from googletrans import Translator
+# from twilio.rest import Client
 
-app = Flask(__name__)
-app.secret_key = '7888accc4a8508133c302792b0cd27f471bb262bc5666c'
+# app = Flask(__name__)
+# app.secret_key = '7888accc4a8508133c302792b0cd27f471bb262bc5666c'
 
-# Sample training data with diseases and their symptoms in English
-training_data = [
-    ("Fever", "high temperature, chills, sweating, headache, muscle pain"),
-    ("Flu", "fever, cough, sore throat, runny or stuffy nose, muscle aches"),
-    ("Cold", "sore throat, runny nose, coughing, sneezing, mild fever"),
-    ("Headache", "dull pain, pressure in the head, nausea, sensitivity to light"),
-    ("Stomachache", "abdominal pain, bloating, nausea, vomiting, diarrhea"),
-    ("Allergy", "sneezing, itchy eyes, runny nose, rash, swelling"),
-    ("ಜ್ವರ", "ಹೆಚ್ಚಿನ ತಾಪಮಾನ, ಚಿಲ್ಲುಗಳು, ಸ್ವೇತ, ತಲೆನೋವು, ಸ್ನಾಯು ನೋವು"),
-    ("ಫ್ಲು", "ಜ್ವರ, ಕಫ, ತುಕ್ಕು, ಓಡೋಣ ಅಥವಾ ನಾಕೆ, ಸ್ನಾಯು ನೋವು"),
-    ("ಚಳಿ", "ತಲೆನೋವು, ಓಡೋಣ, ಕೆಮ್ಮು, ಚಿರತೆ, ಕಡಿಮೆ ಜ್ವರ"),
-    ("ತಲೆನೋವು", "ಮಂದ ಪೆಡ, ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ, ವಾಂತಿ, ಬೆಳಕುಗೆ ಅಸಹನಶೀಲತೆ"),
-    ("ಉಸಿರಾಟದ ನೋವು", "ಪೆಟ್ನ ನೋವು, ಬ್ಲೋಟಿಂಗ್, ವಾಂತಿ, ಉಸಿರಾಟದ ನೋವು, ಜೀರ್ಣಶಕ್ತಿ"),
-    ("ಆಲರ್ಜೀ", "ಚಿರತೆ, ಕಣ್ಣುಗಳು ಸೀಡು, ಓಡೋಣ, ಉಬ್ಬು, ಪುಟ್ಟ"),
-    ("बुखार", "उच्च तापमान, ठंड लगना, पसीना, सिरदर्द, मांसपेशियों में दर्द"),
-    ("फ्लू", "ज्वर, खांसी, गले में खराश, बहती या बंद नाक, मांसपेशियों में दर्द"),
-    ("सर्दी", "गले में खराश, बहती नाक, खांसी, छींके, हल्का ज्वर"),
-    ("सिरदर्द", "सुस्त दर्द, सिर में दबाव, मतली, प्रकाश के प्रति संवेदनशीलता"),
-    ("पेट दर्द", "पेट में दर्द, सूजन, मतली, उल्टी, दस्त"),
-    ("एलर्जी", "छींके, खुजली वाली आँखें, बहती नाक, चकत्ते, सूजन")
-]
+# # Sample training data with diseases and their symptoms in English
+# training_data = [
+#     ("Fever", "high temperature, chills, sweating, headache, muscle pain"),
+#     ("Flu", "fever, cough, sore throat, runny or stuffy nose, muscle aches"),
+#     ("Cold", "sore throat, runny nose, coughing, sneezing, mild fever"),
+#     ("Headache", "dull pain, pressure in the head, nausea, sensitivity to light"),
+#     ("Stomachache", "abdominal pain, bloating, nausea, vomiting, diarrhea"),
+#     ("Allergy", "sneezing, itchy eyes, runny nose, rash, swelling"),
+#     ("ಜ್ವರ", "ಹೆಚ್ಚಿನ ತಾಪಮಾನ, ಚಿಲ್ಲುಗಳು, ಸ್ವೇತ, ತಲೆನೋವು, ಸ್ನಾಯು ನೋವು"),
+#     ("ಫ್ಲು", "ಜ್ವರ, ಕಫ, ತುಕ್ಕು, ಓಡೋಣ ಅಥವಾ ನಾಕೆ, ಸ್ನಾಯು ನೋವು"),
+#     ("ಚಳಿ", "ತಲೆನೋವು, ಓಡೋಣ, ಕೆಮ್ಮು, ಚಿರತೆ, ಕಡಿಮೆ ಜ್ವರ"),
+#     ("ತಲೆನೋವು", "ಮಂದ ಪೆಡ, ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ, ವಾಂತಿ, ಬೆಳಕುಗೆ ಅಸಹನಶೀಲತೆ"),
+#     ("ಉಸಿರಾಟದ ನೋವು", "ಪೆಟ್ನ ನೋವು, ಬ್ಲೋಟಿಂಗ್, ವಾಂತಿ, ಉಸಿರಾಟದ ನೋವು, ಜೀರ್ಣಶಕ್ತಿ"),
+#     ("ಆಲರ್ಜೀ", "ಚಿರತೆ, ಕಣ್ಣುಗಳು ಸೀಡು, ಓಡೋಣ, ಉಬ್ಬು, ಪುಟ್ಟ"),
+#     ("बुखार", "उच्च तापमान, ठंड लगना, पसीना, सिरदर्द, मांसपेशियों में दर्द"),
+#     ("फ्लू", "ज्वर, खांसी, गले में खराश, बहती या बंद नाक, मांसपेशियों में दर्द"),
+#     ("सर्दी", "गले में खराश, बहती नाक, खांसी, छींके, हल्का ज्वर"),
+#     ("सिरदर्द", "सुस्त दर्द, सिर में दबाव, मतली, प्रकाश के प्रति संवेदनशीलता"),
+#     ("पेट दर्द", "पेट में दर्द, सूजन, मतली, उल्टी, दस्त"),
+#     ("एलर्जी", "छींके, खुजली वाली आँखें, बहती नाक, चकत्ते, सूजन")
+# ]
 
-# Create a dictionary for symptoms to diseases mapping in English
-symptoms_to_disease = {
-    "high temperature": "Fever",
-    "chills": "Fever",
-    "sweating": "Fever",
-    "headache": "Fever",
-    "muscle pain": "Fever",
-    "cough": "Flu",
-    "sore throat": "Flu",
-    "runny or stuffy nose": "Flu",
-    "muscle aches": "Flu",
-    "sore throat": "Cold",
-    "runny nose": "Cold",
-    "coughing": "Cold",
-    "sneezing": "Cold",
-    "mild fever": "Cold",
-    "dull pain": "Headache",
-    "pressure in the head": "Headache",
-    "nausea": "Headache",
-    "sensitivity to light": "Headache",
-    "abdominal pain": "Stomachache",
-    "bloating": "Stomachache",
-    "nausea": "Stomachache",
-    "vomiting": "Stomachache",
-    "diarrhea": "Stomachache",
-    "sneezing": "Allergy",
-    "itchy eyes": "Allergy",
-    "runny nose": "Allergy",
-    "rash": "Allergy",
-    "swelling": "Allergy",
+# # Create a dictionary for symptoms to diseases mapping in English
+# symptoms_to_disease = {
+#     "high temperature": "Fever",
+#     "chills": "Fever",
+#     "sweating": "Fever",
+#     "headache": "Fever",
+#     "muscle pain": "Fever",
+#     "cough": "Flu",
+#     "sore throat": "Flu",
+#     "runny or stuffy nose": "Flu",
+#     "muscle aches": "Flu",
+#     "sore throat": "Cold",
+#     "runny nose": "Cold",
+#     "coughing": "Cold",
+#     "sneezing": "Cold",
+#     "mild fever": "Cold",
+#     "dull pain": "Headache",
+#     "pressure in the head": "Headache",
+#     "nausea": "Headache",
+#     "sensitivity to light": "Headache",
+#     "abdominal pain": "Stomachache",
+#     "bloating": "Stomachache",
+#     "nausea": "Stomachache",
+#     "vomiting": "Stomachache",
+#     "diarrhea": "Stomachache",
+#     "sneezing": "Allergy",
+#     "itchy eyes": "Allergy",
+#     "runny nose": "Allergy",
+#     "rash": "Allergy",
+#     "swelling": "Allergy",
 
-    "ಹೆಚ್ಚಿನ ತಾಪಮಾನ": "ಜ್ವರ",
-    "ಚಿಲ್ಲುಗಳು": "ಜ್ವರ",
-    "ಸ್ವೇತ": "ಜ್ವರ",
-    "ತಲೆನೋವು": "ಜ್ವರ",
-    "ಸ್ನಾಯು ನೋವು": "ಜ್ವರ",
-    "ಕೆಮ್ಮು": "ಫ್ಲು",
-    "ತುಕ್ಕು": "ಫ್ಲು",
-    "ಓಡೋಣ ಅಥವಾ ನಾಕೆ": "ಫ್ಲು",
-    "ಸ್ನಾಯು ನೋವು": "ಫ್ಲು",
-    "ತಲೆನೋವು": "ಚಳಿ",
-    "ಓಡೋಣ": "ಚಳಿ",
-    "ಕೆಮ್ಮು": "ಚಳಿ",
-    "ಚಿರತೆ": "ಚಳಿ",
-    "ಕಡಿಮೆ ಜ್ವರ": "ಚಳಿ",
-    "ಮಂದ ಪೆಡ": "ತಲೆನೋವು",
-    "ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ": "ತಲೆನೋವು",
-    "ವಾಂತಿ": "ತಲೆನೋವು",
-    "ಬಳಕುಗಾಗಿ ಅಸಹನಶೀಲತೆ": "ತಲೆನೋವು",
-    "ಪೆಟ್ನ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
-    "ಬ್ಲೋಟಿಂಗ್": "ಉಸಿರಾಟದ ನೋವು",
-    "ವಾಂತಿ": "ಉಸಿರಾಟದ ನೋವು",
-    "ಉಸಿರಾಟದ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
-    "ಜೀರ್ಣಶಕ್ತಿ": "ಉಸಿರಾಟದ ನೋವು",
-    "ಚಿರತೆ": "ಆಲರ್ಜೀ",
-    "ಕಣ್ಣುಗಳು ಸೀಡು": "ಆಲರ್ಜೀ",
-    "ಓಡೋಣ": "ಆಲರ್ಜೀ",
-    "ಉಬ್ಬು": "ಆಲರ್ಜೀ",
-    "ಪುಟ್ಟ": "ಆಲರ್ಜೀ",
+#     "ಹೆಚ್ಚಿನ ತಾಪಮಾನ": "ಜ್ವರ",
+#     "ಚಿಲ್ಲುಗಳು": "ಜ್ವರ",
+#     "ಸ್ವೇತ": "ಜ್ವರ",
+#     "ತಲೆನೋವು": "ಜ್ವರ",
+#     "ಸ್ನಾಯು ನೋವು": "ಜ್ವರ",
+#     "ಕೆಮ್ಮು": "ಫ್ಲು",
+#     "ತುಕ್ಕು": "ಫ್ಲು",
+#     "ಓಡೋಣ ಅಥವಾ ನಾಕೆ": "ಫ್ಲು",
+#     "ಸ್ನಾಯು ನೋವು": "ಫ್ಲು",
+#     "ತಲೆನೋವು": "ಚಳಿ",
+#     "ಓಡೋಣ": "ಚಳಿ",
+#     "ಕೆಮ್ಮು": "ಚಳಿ",
+#     "ಚಿರತೆ": "ಚಳಿ",
+#     "ಕಡಿಮೆ ಜ್ವರ": "ಚಳಿ",
+#     "ಮಂದ ಪೆಡ": "ತಲೆನೋವು",
+#     "ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ": "ತಲೆನೋವು",
+#     "ವಾಂತಿ": "ತಲೆನೋವು",
+#     "ಬಳಕುಗಾಗಿ ಅಸಹನಶೀಲತೆ": "ತಲೆನೋವು",
+#     "ಪೆಟ್ನ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
+#     "ಬ್ಲೋಟಿಂಗ್": "ಉಸಿರಾಟದ ನೋವು",
+#     "ವಾಂತಿ": "ಉಸಿರಾಟದ ನೋವು",
+#     "ಉಸಿರಾಟದ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
+#     "ಜೀರ್ಣಶಕ್ತಿ": "ಉಸಿರಾಟದ ನೋವು",
+#     "ಚಿರತೆ": "ಆಲರ್ಜೀ",
+#     "ಕಣ್ಣುಗಳು ಸೀಡು": "ಆಲರ್ಜೀ",
+#     "ಓಡೋಣ": "ಆಲರ್ಜೀ",
+#     "ಉಬ್ಬು": "ಆಲರ್ಜೀ",
+#     "ಪುಟ್ಟ": "ಆಲರ್ಜೀ",
 
-    "उच्च तापमान": "बुखार",
-    "ठंड लगना": "बुखार",
-    "पसीना": "बुखार",
-    "सिरदर्द": "बुखार",
-    "मांसपेशियों में दर्द": "बुखार",
-    "खांसी": "फ्लू",
-    "गले में खराश": "फ्लू",
-    "बहती या बंद नाक": "फ्लू",
-    "मांसपेशियों में दर्द": "फ्लू",
-    "गले में खराश": "सर्दी",
-    "बहती नाक": "सर्दी",
-    "खांसी": "सर्दी",
-    "छींके": "सर्दी",
-    "हल्का ज्वर": "सर्दी",
-    "सुस्त दर्द": "सिरदर्द",
-    "सिर में दबाव": "सिरदर्द",
-    "मतली": "सिरदर्द",
-    "प्रकाश के प्रति संवेदनशीलता": "सिरदर्द",
-    "पेट में दर्द": "पेट दर्द",
-    "सूजन": "पेट दर्द",
-    "मतली": "पेट दर्द",
-    "उल्टी": "पेट दर्द",
-    "दस्त": "पेट दर्द",
-    "छींके": "एलर्जी",
-    "खुजली वाली आँखें": "एलर्जी",
-    "बहती नाक": "एलर्जी",
-    "चकत्ते": "एलर्जी",
-    "सूजन": "एलर्जी"
+#     "उच्च तापमान": "बुखार",
+#     "ठंड लगना": "बुखार",
+#     "पसीना": "बुखार",
+#     "सिरदर्द": "बुखार",
+#     "मांसपेशियों में दर्द": "बुखार",
+#     "खांसी": "फ्लू",
+#     "गले में खराश": "फ्लू",
+#     "बहती या बंद नाक": "फ्लू",
+#     "मांसपेशियों में दर्द": "फ्लू",
+#     "गले में खराश": "सर्दी",
+#     "बहती नाक": "सर्दी",
+#     "खांसी": "सर्दी",
+#     "छींके": "सर्दी",
+#     "हल्का ज्वर": "सर्दी",
+#     "सुस्त दर्द": "सिरदर्द",
+#     "सिर में दबाव": "सिरदर्द",
+#     "मतली": "सिरदर्द",
+#     "प्रकाश के प्रति संवेदनशीलता": "सिरदर्द",
+#     "पेट में दर्द": "पेट दर्द",
+#     "सूजन": "पेट दर्द",
+#     "मतली": "पेट दर्द",
+#     "उल्टी": "पेट दर्द",
+#     "दस्त": "पेट दर्द",
+#     "छींके": "एलर्जी",
+#     "खुजली वाली आँखें": "एलर्जी",
+#     "बहती नाक": "एलर्जी",
+#     "चकत्ते": "एलर्जी",
+#     "सूजन": "एलर्जी"
 
-}
-
-
-# Create a dictionary for disease names in Kannada and Hindi
-disease_names = {
-    "Fever": {"kn": "ಜ್ವರ", "hi": "बुखार"},
-     "Flu": {"kn": "ಫ್ಲು", "hi": "फ्लू"},
-     "Cold": {"kn": "ಚಳಿ", "hi": "सर्दी"},
-     "Headache": {"kn": "ತಲೆನೋವು", "hi": "सिरदर्द"},
-     "Stomachache": {"kn": "ಉಸಿರಾಟದ ನೋವು", "hi": "पेट दर्द"},
-     "Allergy": {"kn": "ಆಲರ್ಜೀ", "hi": "एलर्जी"}
-}
-
-translator = Translator()
+# }
 
 
+# # Create a dictionary for disease names in Kannada and Hindi
+# disease_names = {
+#     "Fever": {"kn": "ಜ್ವರ", "hi": "बुखार"},
+#      "Flu": {"kn": "ಫ್ಲು", "hi": "फ्लू"},
+#      "Cold": {"kn": "ಚಳಿ", "hi": "सर्दी"},
+#      "Headache": {"kn": "ತಲೆನೋವು", "hi": "सिरदर्द"},
+#      "Stomachache": {"kn": "ಉಸಿರಾಟದ ನೋವು", "hi": "पेट दर्द"},
+#      "Allergy": {"kn": "ಆಲರ್ಜೀ", "hi": "एलर्जी"}
+# }
 
-# Twilio configuration for WhatsApp
-TWILIO_ACCOUNT_SID = 'AC61b18d8a3f44c68ea16037670f4bb276'
-TWILIO_AUTH_TOKEN = 'a70eb6d8bdffda9636dd6e32ccdf81a4'
-TWILIO_PHONE_NUMBER = 'whatsapp:+14155238886'
-client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+# translator = Translator()
 
-def send_whatsapp_message(to_number, message_body):
-    message = client.messages.create(
-        from_=TWILIO_PHONE_NUMBER,
-        body=message_body,
-        to=f'whatsapp:{to_number}'
-    )
-    print(f"Message SID: {message.sid}")
 
-# Function to train and save the model
-def train_and_save_model():
-    X_train, y_train = zip(*training_data)
-    vectorizer = TfidfVectorizer()
-    X_train_tfidf = vectorizer.fit_transform(X_train)
-    model = LinearSVC()
-    model.fit(X_train_tfidf, y_train)
 
-    with open('model.pkl', 'wb') as model_file:
-        pickle.dump(model, model_file)
-    with open('vectorizer.pkl', 'wb') as vectorizer_file:
-        pickle.dump(vectorizer, vectorizer_file)
+# # Twilio configuration for WhatsApp
+# TWILIO_ACCOUNT_SID = 'AC61b18d8a3f44c68ea16037670f4bb276'
+# TWILIO_AUTH_TOKEN = 'a70eb6d8bdffda9636dd6e32ccdf81a4'
+# TWILIO_PHONE_NUMBER = 'whatsapp:+14155238886'
+# client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-if not os.path.exists('model.pkl') or not os.path.exists('vectorizer.pkl'):
-    train_and_save_model()
+# def send_whatsapp_message(to_number, message_body):
+#     message = client.messages.create(
+#         from_=TWILIO_PHONE_NUMBER,
+#         body=message_body,
+#         to=f'whatsapp:{to_number}'
+#     )
+#     print(f"Message SID: {message.sid}")
 
-# Load the model and vectorizer
-with open('model.pkl', 'rb') as model_file:
-    model = pickle.load(model_file)
-with open('vectorizer.pkl', 'rb') as vectorizer_file:
-    vectorizer = pickle.load(vectorizer_file)
+# # Function to train and save the model
+# def train_and_save_model():
+#     X_train, y_train = zip(*training_data)
+#     vectorizer = TfidfVectorizer()
+#     X_train_tfidf = vectorizer.fit_transform(X_train)
+#     model = LinearSVC()
+#     model.fit(X_train_tfidf, y_train)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+#     with open('model.pkl', 'wb') as model_file:
+#         pickle.dump(model, model_file)
+#     with open('vectorizer.pkl', 'wb') as vectorizer_file:
+#         pickle.dump(vectorizer, vectorizer_file)
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    user_message = request.json['message']
-    user_language = request.json.get('language', 'en')
+# if not os.path.exists('model.pkl') or not os.path.exists('vectorizer.pkl'):
+#     train_and_save_model()
 
-    # Translation logic
-    translator = Translator()
-    if user_language == 'kn':
-        user_message = translator.translate(user_message, src='kn', dest='en').text
-    elif user_language == 'hi':
-        user_message = translator.translate(user_message, src='hi', dest='en').text
+# # Load the model and vectorizer
+# with open('model.pkl', 'rb') as model_file:
+#     model = pickle.load(model_file)
+# with open('vectorizer.pkl', 'rb') as vectorizer_file:
+#     vectorizer = pickle.load(vectorizer_file)
 
-    # Predicting disease
-    user_message_vector = vectorizer.transform([user_message])
-    response = model.predict(user_message_vector)[0]
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
 
-    # Mapping symptoms to diseases
-    symptoms = user_message.lower().split(", ")
-    diseases = set()
-    for symptom in symptoms:
-        if symptom in symptoms_to_disease:
-            diseases.add(symptoms_to_disease[symptom])
+# @app.route('/chat', methods=['POST'])
+# def chat():
+#     user_message = request.json['message']
+#     user_language = request.json.get('language', 'en')
 
-    if diseases:
-        response = f"I think you might have: {', '.join(diseases)}. We are connecting you to a suitable doctor, please wait."
+#     # Translation logic
+#     translator = Translator()
+#     if user_language == 'kn':
+#         user_message = translator.translate(user_message, src='kn', dest='en').text
+#     elif user_language == 'hi':
+#         user_message = translator.translate(user_message, src='hi', dest='en').text
 
-        # Send WhatsApp message after predicting the disease
-        send_whatsapp_message('+918804339456', response)
+#     # Predicting disease
+#     user_message_vector = vectorizer.transform([user_message])
+#     response = model.predict(user_message_vector)[0]
 
-    # Translation back to the user’s language
-    if user_language == 'kn':
-        response = translator.translate(response, src='en', dest='kn').text
-    elif user_language == 'hi':
-        response = translator.translate(response, src='en', dest='hi').text
+#     # Mapping symptoms to diseases
+#     symptoms = user_message.lower().split(", ")
+#     diseases = set()
+#     for symptom in symptoms:
+#         if symptom in symptoms_to_disease:
+#             diseases.add(symptoms_to_disease[symptom])
 
-    return jsonify({'response': response})
+#     if diseases:
+#         response = f"I think you might have: {', '.join(diseases)}. We are connecting you to a suitable doctor, please wait."
 
-if __name__ == '__main__':
-    app.run(debug=True)
+#         # Send WhatsApp message after predicting the disease
+#         send_whatsapp_message('+918804339456', response)
+
+#     # Translation back to the user’s language
+#     if user_language == 'kn':
+#         response = translator.translate(response, src='en', dest='kn').text
+#     elif user_language == 'hi':
+#         response = translator.translate(response, src='en', dest='hi').text
+
+#     return jsonify({'response': response})
+
+# if __name__ == '__main__':
+#     app.run(debug=True)

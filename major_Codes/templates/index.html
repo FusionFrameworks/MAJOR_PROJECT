@@ -1913,7 +1913,7 @@
 </html> -->
 
 
-
+<!-- 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -2160,4 +2160,255 @@
 </html>
 
 
+ -->
 
+
+
+
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #d9a7c7, #fffcdc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .chat-container {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            width: 480px; /* Increased width */
+            max-width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #007bff;
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: background 0.3s ease;
+        }
+        .chat-box:hover {
+            background: #e2e6ea;
+        }
+        .chat-box div {
+            border-radius: 15px;
+            padding: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+        .user {
+            align-self: flex-end;
+            background-color: #007bff;
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .bot {
+            align-self: flex-start;
+            background-color: #e9ecef;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .input-container select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f1f1f1;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+        .input-container select:hover {
+            background: #e2e6ea;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        .input-container input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .input-container button {
+            padding: 12px 20px;
+            border: none;
+            color: #ffffff;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .input-container button:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+        .microphone-button {
+            background-color: #17a2b8;
+        }
+        .microphone-button:hover {
+            background-color: #138496;
+        }
+        .send-button {
+            background-color: #007bff;
+        }
+        .send-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-container">
+            <select id="language-select" class="language-select">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="kn">Kannada</option>
+            </select>
+            <input type="text" id="user-input" placeholder="Type a message...">
+            <button class="send-button" onclick="sendMessage()">Send</button>
+            <button class="microphone-button" onclick="startSpeechRecognition()">🎙</button>
+        </div>
+    </div>
+
+    <script>
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        const synth = window.speechSynthesis;
+    
+        // Function to update the speech recognition language
+        function updateLanguage() {
+            const language = document.getElementById('language-select').value;
+            recognition.lang = language === 'kn' ? 'kn-IN' : language === 'hi' ? 'hi-IN' : 'en-US';
+            console.log(`Speech recognition language set to ${recognition.lang}`);
+        }
+    
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+    
+        recognition.onstart = function () {
+            console.log('Speech recognition started');
+            document.getElementById('user-input').placeholder = "Listening...";
+        };
+    
+        recognition.onend = function () {
+            console.log('Speech recognition ended');
+            document.getElementById('user-input').placeholder = "Type a message...";
+        };
+    
+        recognition.onresult = function (event) {
+            let transcript = event.results[0][0].transcript;
+            console.log(`Speech recognized: ${transcript}`);
+    
+            transcript = addCommasForSymptoms(transcript);
+    
+            document.getElementById('user-input').value = transcript;
+            sendMessage();
+        };
+    
+        recognition.onerror = function (event) {
+            console.error('Speech recognition error:', event.error);
+            alert(`Speech recognition error: ${event.error}`);
+        };
+    
+        function startSpeechRecognition() {
+            updateLanguage();
+            recognition.start();
+        }
+    
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            const language = document.getElementById('language-select').value;
+    
+            if (!userInput) return;
+    
+            const chatBox = document.getElementById('chat-box');
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('user');
+            userMessage.textContent = userInput;
+            chatBox.appendChild(userMessage);
+    
+            chatBox.scrollTop = chatBox.scrollHeight;
+            document.getElementById('user-input').value = '';
+    
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: userInput, language: language })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessage = document.createElement('div');
+                botMessage.classList.add('bot');
+                botMessage.textContent = data.response;
+                chatBox.appendChild(botMessage);
+                chatBox.scrollTop = chatBox.scrollHeight;
+    
+                speakBotResponse(data.response, language);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function speakBotResponse(text, language) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = language === 'kn' ? 'kn-IN' : language === 'hi' ? 'hi-IN' : 'en-US';
+    
+            utterance.onend = function () {
+                console.log("Speech has ended, restarting recognition...");
+                startSpeechRecognition();
+            };
+    
+            synth.speak(utterance);
+        }
+    
+        function addCommasForSymptoms(text) {
+            const symptoms = ['high temperature', 'sweating', 'chills', 'cough', 'sore throat', 'headache', 'muscle pain'];
+    
+            symptoms.forEach(symptom => {
+                const symptomRegex = new RegExp(`\\b${symptom}\\b`, 'gi');
+                text = text.replace(symptomRegex, `${symptom},`);
+            });
+    
+            text = text.replace(/,+/g, ',').replace(/,(\s*,)+/g, ', ');
+            text = text.trim().replace(/,$/, '');
+    
+            return text;
+        }
+    
+        document.getElementById('user-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

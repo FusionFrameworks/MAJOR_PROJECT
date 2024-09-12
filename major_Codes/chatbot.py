@@ -720,7 +720,7 @@
 
 
 
-0
+
 # from flask import Flask, request, jsonify, render_template, session
 # from sklearn.feature_extraction.text import TfidfVectorizer
 # from sklearn.svm import LinearSVC
@@ -1193,6 +1193,20 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+#modify this code  it taking symptoms in single single but not giving the output
+
+
 # from flask import Flask, request, jsonify, render_template, session
 # from sklearn.feature_extraction.text import TfidfVectorizer
 # from sklearn.svm import LinearSVC
@@ -1212,9 +1226,21 @@
 #     ("Headache", "dull pain, pressure in the head, nausea, sensitivity to light"),
 #     ("Stomachache", "abdominal pain, bloating, nausea, vomiting, diarrhea"),
 #     ("Allergy", "sneezing, itchy eyes, runny nose, rash, swelling"),
+#     ("ಜ್ವರ", "ಹೆಚ್ಚಿನ ತಾಪಮಾನ, ಚಿಲ್ಲುಗಳು, ಸ್ವೇತ, ತಲೆನೋವು, ಸ್ನಾಯು ನೋವು"),
+#     ("ಫ್ಲು", "ಜ್ವರ, ಕಫ, ತುಕ್ಕು, ಓಡೋಣ ಅಥವಾ ನಾಕೆ, ಸ್ನಾಯು ನೋವು"),
+#     ("ಚಳಿ", "ತಲೆನೋವು, ಓಡೋಣ, ಕೆಮ್ಮು, ಚಿರತೆ, ಕಡಿಮೆ ಜ್ವರ"),
+#     ("ತಲೆನೋವು", "ಮಂದ ಪೆಡ, ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ, ವಾಂತಿ, ಬೆಳಕುಗೆ ಅಸಹನಶೀಲತೆ"),
+#     ("ಉಸಿರಾಟದ ನೋವು", "ಪೆಟ್ನ ನೋವು, ಬ್ಲೋಟಿಂಗ್, ವಾಂತಿ, ಉಸಿರಾಟದ ನೋವು, ಜೀರ್ಣಶಕ್ತಿ"),
+#     ("ಆಲರ್ಜೀ", "ಚಿರತೆ, ಕಣ್ಣುಗಳು ಸೀಡು, ಓಡೋಣ, ಉಬ್ಬು, ಪುಟ್ಟ"),
+#     ("बुखार", "उच्च तापमान, ठंड लगना, पसीना, सिरदर्द, मांसपेशियों में दर्द"),
+#     ("फ्लू", "ज्वर, खांसी, गले में खराश, बहती या बंद नाक, मांसपेशियों में दर्द"),
+#     ("सर्दी", "गले में खराश, बहती नाक, खांसी, छींके, हल्का ज्वर"),
+#     ("सिरदर्द", "सुस्त दर्द, सिर में दबाव, मतली, प्रकाश के प्रति संवेदनशीलता"),
+#     ("पेट दर्द", "पेट में दर्द, सूजन, मतली, उल्टी, दस्त"),
+#     ("एलर्जी", "छींके, खुजली वाली आँखें, बहती नाक, चकत्ते, सूजन")
 # ]
 
-# # Create a dictionary for symptoms to diseases mapping
+# # Create a dictionary for symptoms to diseases mapping in English, Kannada, and Hindi
 # symptoms_to_disease = {
 #     "high temperature": "Fever",
 #     "chills": "Fever",
@@ -1243,7 +1269,76 @@
 #     "itchy eyes": "Allergy",
 #     "runny nose": "Allergy",
 #     "rash": "Allergy",
-#     "swelling": "Allergy"
+#     "swelling": "Allergy",
+
+#     "ಹೆಚ್ಚಿನ ತಾಪಮಾನ": "ಜ್ವರ",
+#     "ಚಿಲ್ಲುಗಳು": "ಜ್ವರ",
+#     "ಸ್ವೇತ": "ಜ್ವರ",
+#     "ತಲೆನೋವು": "ಜ್ವರ",
+#     "ಸ್ನಾಯು ನೋವು": "ಜ್ವರ",
+#     "ಕೆಮ್ಮು": "ಫ್ಲು",
+#     "ತುಕ್ಕು": "ಫ್ಲು",
+#     "ಓಡೋಣ ಅಥವಾ ನಾಕೆ": "ಫ್ಲು",
+#     "ಸ್ನಾಯು ನೋವು": "ಫ್ಲು",
+#     "ತಲೆನೋವು": "ಚಳಿ",
+#     "ಓಡೋಣ": "ಚಳಿ",
+#     "ಕೆಮ್ಮು": "ಚಳಿ",
+#     "ಚಿರತೆ": "ಚಳಿ",
+#     "ಕಡಿಮೆ ಜ್ವರ": "ಚಳಿ",
+#     "ಮಂದ ಪೆಡ": "ತಲೆನೋವು",
+#     "ತಲೆಯೊಳಗಿನ ಒತ್ತಣೆ": "ತಲೆನೋವು",
+#     "ವಾಂತಿ": "ತಲೆನೋವು",
+#     "ಬಳಕುಗಾಗಿ ಅಸಹನಶೀಲತೆ": "ತಲೆನೋವು",
+#     "ಪೆಟ್ನ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
+#     "ಬ್ಲೋಟಿಂಗ್": "ಉಸಿರಾಟದ ನೋವು",
+#     "ವಾಂತಿ": "ಉಸಿರಾಟದ ನೋವು",
+#     "ಉಸಿರಾಟದ ನೋವು": "ಉಸಿರಾಟದ ನೋವು",
+#     "ಜೀರ್ಣಶಕ್ತಿ": "ಉಸಿರಾಟದ ನೋವು",
+#     "ಚಿರತೆ": "ಆಲರ್ಜೀ",
+#     "ಕಣ್ಣುಗಳು ಸೀಡು": "ಆಲರ್ಜೀ",
+#     "ಓಡೋಣ": "ಆಲರ್ಜೀ",
+#     "ಉಬ್ಬು": "ಆಲರ್ಜೀ",
+#     "ಪುಟ್ಟ": "ಆಲರ್ಜೀ",
+
+#     "उच्च तापमान": "बुखार",
+#     "ठंड लगना": "बुखार",
+#     "पसीना": "बुखार",
+#     "सिरदर्द": "बुखार",
+#     "मांसपेशियों में दर्द": "बुखार",
+#     "खांसी": "फ्लू",
+#     "गले में खराश": "फ्लू",
+#     "बहती या बंद नाक": "फ्लू",
+#     "मांसपेशियों में दर्द": "फ्लू",
+#     "गले में खराश": "सर्दी",
+#     "बहती नाक": "सर्दी",
+#     "खांसी": "सर्दी",
+#     "छींके": "सर्दी",
+#     "हल्का ज्वर": "सर्दी",
+#     "सुस्त दर्द": "सिरदर्द",
+#     "सिर में दबाव": "सिरदर्द",
+#     "मतली": "सिरदर्द",
+#     "प्रकाश के प्रति संवेदनशीलता": "सिरदर्द",
+#     "पेट में दर्द": "पेट दर्द",
+#     "सूजन": "पेट दर्द",
+#     "मतली": "पेट दर्द",
+#     "उल्टी": "पेट दर्द",
+#     "दस्त": "पेट दर्द",
+#     "छींके": "एलर्जी",
+#     "खुजली वाली आँखें": "एलर्जी",
+#     "बहती नाक": "एलर्जी",
+#     "चकत्ते": "एलर्जी",
+#     "सूजन": "एलर्जी"
+
+# }
+
+# # Create a dictionary for disease names in Kannada and Hindi
+# disease_names = {
+#     "Fever": {"kn": "ಜ್ವರ", "hi": "बुखार"},
+#      "Flu": {"kn": "ಫ್ಲು", "hi": "फ्लू"},
+#      "Cold": {"kn": "ಚಳಿ", "hi": "सर्दी"},
+#      "Headache": {"kn": "ತಲೆನೋವು", "hi": "सिरदर्द"},
+#      "Stomachache": {"kn": "ಉಸಿರಾಟದ ನೋವು", "hi": "पेट दर्द"},
+#      "Allergy": {"kn": "ಆಲರ್ಜೀ", "hi": "एलर्जी"}
 # }
 
 # # Twilio configuration
@@ -1264,7 +1359,7 @@
 # def train_and_save_model():
 #     X_train, y_train = zip(*training_data)
 #     vectorizer = TfidfVectorizer()
-#     X_train_vectors = vectorizer.fit_transform(X_train)
+#     X_train_vectors = vectorizer.fit_transform(y_train)
 #     model = LinearSVC()
 #     model.fit(X_train_vectors, y_train)
 #     with open("chatbot_vectorizer.pkl", "wb") as f:
@@ -1306,13 +1401,7 @@
 #                 response = "Got it. Please provide another symptom."
 #             else:
 #                 symptoms = session['symptoms']
-#                 # Concatenate all symptoms into a single string for prediction
-#                 symptom_string = ', '.join(symptoms)
-#                 user_message_vector = vectorizer.transform([symptom_string])
-#                 disease_predictions = model.predict(user_message_vector)
-#                 disease = disease_predictions[0]
-                
-#                 # Check if the symptoms map to the disease
+#                 # Map symptoms to diseases based on the predefined mapping
 #                 predicted_diseases = set()
 #                 for symptom in symptoms:
 #                     if symptom in symptoms_to_disease:
@@ -1347,35 +1436,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#modify this code  it taking symptoms in single single but not giving the output
-
-
 from flask import Flask, request, jsonify, render_template, session
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
@@ -1383,11 +1443,13 @@ import pickle
 import os
 from googletrans import Translator
 from twilio.rest import Client
+from twilio.twiml.messaging_response import MessagingResponse
+# import logging
+# from twilio.rest import Client
 
 app = Flask(__name__)
 app.secret_key = '7888accc4a8508133c302792b0cd27f471bb262bc5666c'
-
-# Sample training data with diseases and their symptoms in English
+# Sample training data with diseases and their symptoms in English, Kannada, and Hindi
 training_data = [
     ("Fever", "high temperature, chills, sweating, headache, muscle pain"),
     ("Flu", "fever, cough, sore throat, runny or stuffy nose, muscle aches"),
@@ -1510,6 +1572,9 @@ disease_names = {
      "Allergy": {"kn": "ಆಲರ್ಜೀ", "hi": "एलर्जी"}
 }
 
+translator = Translator()
+
+
 # Twilio configuration
 TWILIO_ACCOUNT_SID = 'AC61b18d8a3f44c68ea16037670f4bb276'
 TWILIO_AUTH_TOKEN = 'a70eb6d8bdffda9636dd6e32ccdf81a4'
@@ -1526,9 +1591,9 @@ def send_sms(to_number, message_body):
 
 # Function to train and save the model
 def train_and_save_model():
-    X_train, y_train = zip(*training_data)
+    X_train, y_train = zip(*training_data[:6])
     vectorizer = TfidfVectorizer()
-    X_train_vectors = vectorizer.fit_transform(y_train)
+    X_train_vectors = vectorizer.fit_transform(X_train)
     model = LinearSVC()
     model.fit(X_train_vectors, y_train)
     with open("chatbot_vectorizer.pkl", "wb") as f:
@@ -1549,45 +1614,34 @@ with open("chatbot_model.pkl", "rb") as f:
 
 @app.route('/')
 def index():
-    session.clear()  # Clear session data on refresh
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json['message']
     user_language = request.json.get('language', 'en')
-    translator = Translator()
 
-    if 'welcome' not in session:
-        session['conversation'] = []
-        session['symptoms'] = []
-        session['welcome'] = True
-        response = "Welcome! Please tell me your symptoms one by one. I will help you identify the possible disease."
-    else:
-        if len(session['symptoms']) < 3:
-            session['symptoms'].append(user_message.lower())
-            if len(session['symptoms']) < 3:
-                response = "Got it. Please provide another symptom."
-            else:
-                symptoms = session['symptoms']
-                # Map symptoms to diseases based on the predefined mapping
-                predicted_diseases = set()
-                for symptom in symptoms:
-                    if symptom in symptoms_to_disease:
-                        predicted_diseases.add(symptoms_to_disease[symptom])
-                
-                if predicted_diseases:
-                    response = f"I think you might have: {', '.join(predicted_diseases)}. We are connecting you to a suitable doctor, please wait."
-                else:
-                    response = "Sorry, I couldn't recognize the symptoms."
+    if user_language == 'kn':
+        user_message = translator.translate(user_message, src='kn', dest='en').text
+    elif user_language == 'hi':
+        user_message = translator.translate(user_message, src='hi', dest='en').text
 
-                # Send SMS after predicting the disease
-                send_sms('+918804339456', response)
-                session.clear()  # Clear symptoms and conversation after prediction
-        else:
-            response = "You have already provided three symptoms. Please wait for the prediction."
+    session.setdefault('conversation', []).append(('user', user_message))
 
-    # Translate response if necessary
+    user_message_vector = vectorizer.transform([user_message])
+    response = model.predict(user_message_vector)[0]
+
+    symptoms = user_message.lower().split(", ")
+    diseases = set()
+    for symptom in symptoms:
+        if symptom in symptoms_to_disease:
+            diseases.add(symptoms_to_disease[symptom])
+    if diseases:
+        response = f"I think you might have: {', '.join(diseases)}. We are connecting you to a suitable doctor please wait."
+
+        # Send SMS after predicting the disease
+        send_sms('+918804339456', response)
+
     if user_language == 'kn':
         response = translator.translate(response, src='en', dest='kn').text
     elif user_language == 'hi':

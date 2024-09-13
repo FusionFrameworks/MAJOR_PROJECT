@@ -1443,7 +1443,7 @@ import pickle
 import os
 from googletrans import Translator
 from twilio.rest import Client
-from twilio.twiml.messaging_response import MessagingResponse
+# from twilio.twiml.messaging_response import MessagingResponse
 # import logging
 # from twilio.rest import Client
 
@@ -1575,19 +1575,19 @@ disease_names = {
 translator = Translator()
 
 
-# Twilio configuration
-TWILIO_ACCOUNT_SID = 'AC61b18d8a3f44c68ea16037670f4bb276'
-TWILIO_AUTH_TOKEN = 'a70eb6d8bdffda9636dd6e32ccdf81a4'
-TWILIO_PHONE_NUMBER = '+18322395320'
-client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+# # Twilio configuration
+# TWILIO_ACCOUNT_SID = 'AC61b18d8a3f44c68ea16037670f4bb276'
+# TWILIO_AUTH_TOKEN = 'a70eb6d8bdffda9636dd6e32ccdf81a4'
+# TWILIO_PHONE_NUMBER = '+18322395320'
+# client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-def send_sms(to_number, message_body):
-    message = client.messages.create(
-        from_=TWILIO_PHONE_NUMBER,
-        body=message_body,
-        to=to_number
-    )
-    print(f"Message SID: {message.sid}")
+# def send_sms(to_number, message_body):
+#     message = client.messages.create(
+#         from_=TWILIO_PHONE_NUMBER,
+#         body=message_body,
+#         to=to_number
+#     )
+#     print(f"Message SID: {message.sid}")
 
 # Function to train and save the model
 def train_and_save_model():
@@ -1640,7 +1640,7 @@ def chat():
         response = f"I think you might have: {', '.join(diseases)}. We are connecting you to a suitable doctor please wait."
 
         # Send SMS after predicting the disease
-        send_sms('+918804339456', response)
+        # send_sms('+918804339456', response)
 
     if user_language == 'kn':
         response = translator.translate(response, src='en', dest='kn').text
